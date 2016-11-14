@@ -25,15 +25,58 @@ class App(Frame):
         self.createui()
         self.drawui()
     def creategrid(self):
+        wmap=choice([\
+            ["0000000000000000",\
+            "0000000000000000",\
+            "0011111111111100",\
+            "0010000110000100",\
+            "0000000110000000",\
+            "0000000110000000",\
+            "0000000110000000",\
+            "0000000110000000",\
+            "0000000110000000",\
+            "0000000110000000",\
+            "0000000110000000",\
+            "0000000110000000",\
+            "0000000110000000",\
+            "0000001111000000",\
+            "0000000000000000",\
+            "0000000000000000"],\
+            ["0000000000000000",\
+            "0000000000000000",\
+            "0000000000000000",\
+            "0001111111111000",\
+            "0001000000001000",\
+            "0001000000001000",\
+            "0001001001001000",\
+            "0001001001001000",\
+            "0001001001001000",\
+            "0001001111001000",\
+            "0001000000001000",\
+            "0001000000001000",\
+            "0001110000111000",\
+            "0000000000000000",\
+            "0000000000000000",\
+            "0000000000000000"]])
         self.gamemap=[[Tile(j,i,self.cellsize,self.draw,self) for i in range(0,16)] for j in range(0,16)]
         self.playerx=randint(1,15)
         self.playery=randint(1,15)
         treasure=["gold"]
         monsters=["rat"]
         for i in range(10):
-            self.gamemap[randint(0,15)][randint(0,15)].tile=choice(monsters)
+            x=randint(0,15)
+            y=randint(0,15)
+            if self.tile(x,y).tile=="blank":
+                self.gamemap[randint(0,15)][randint(0,15)].tile=choice(monsters)
         for i in range(10):
-            self.gamemap[randint(0,15)][randint(0,15)].tile=choice(treasure)
+            x=randint(0,15)
+            y=randint(0,15)
+            if self.tile(x,y).tile=="blank":
+                self.gamemap[randint(0,15)][randint(0,15)].tile=choice(treasure)
+        for i in self.gamemap:
+            for j in i:
+                pass
+                j.mapcheck(wmap)
     def drawgrid(self,cellsize):
         self.draw.width=7+16*cellsize
         self.draw.height=7+16*cellsize
@@ -109,12 +152,18 @@ class Tile:
         self.monsters=["rat"]
         self.treasure=["gold"]
         self.ground=[]
+    def mapcheck(self,wmap):
+        if wmap[self.y][self.x]=="1":
+            self.tile="wall"
     def draw(self):
         if self.capped:
             self.objects.append(self.canvas.create_rectangle(7+(self.x)*self.cellsize,7+(self.y)*self.cellsize,7+(self.x+1)*self.cellsize,7+(self.y+1)*self.cellsize,fill="#666"))
             self.canvas.tag_bind(self.objects[0],"<Button-1>",self.action)
         else:
-            self.objects.append(self.canvas.create_rectangle(7+(self.x)*self.cellsize,7+(self.y)*self.cellsize,7+(self.x+1)*self.cellsize,7+(self.y+1)*self.cellsize,fill="#ccc"))
+            if self.tile=="wall":
+                self.objects.append(self.canvas.create_rectangle(7+(self.x)*self.cellsize,7+(self.y)*self.cellsize,7+(self.x+1)*self.cellsize,7+(self.y+1)*self.cellsize,fill="#111"))
+            else:
+                self.objects.append(self.canvas.create_rectangle(7+(self.x)*self.cellsize,7+(self.y)*self.cellsize,7+(self.x+1)*self.cellsize,7+(self.y+1)*self.cellsize,fill="#ccc"))
             if self.tile=="blank":
                 monsters,treasure=self.search()
                 nearby=monsters+treasure

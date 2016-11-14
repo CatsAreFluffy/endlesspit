@@ -6,6 +6,14 @@ class App(Frame):
         self.pack()
         seed(0)
         self.cellsize=32
+        self.gold=0
+        self.hp=10
+        self.maxhp=10
+        self.agi=0
+        self.str=0
+        self.blk=0
+        self.acc=0
+        self.ui=[0,0,0,0,0]
         self.createWidgets()
     def createWidgets(self):
         self.draw=Canvas(self,width=16*self.cellsize+6,height=16*self.cellsize+6)
@@ -14,6 +22,8 @@ class App(Frame):
         self.gamemap[self.playerx][self.playery].uncap()
         self.drawgrid(self.cellsize)
         self.drawtiles()
+        self.createui()
+        #self.drawui()
     def buttonaevent(self):
         pass
     def buttonbevent(self):
@@ -37,9 +47,21 @@ class App(Frame):
             self.draw.create_line(7,7+i*cellsize,7+16*cellsize,7+i*cellsize)
             self.draw.create_line(7+i*cellsize,7,7+i*cellsize,7+16*cellsize)           
         self.cellsize=cellsize
+    def createui(self):
+        self.ui=[Label(text="HP:"+str(self.maxhp)+"/"+str(self.hp)),Label(text="STR: "+str(self.str)),Label(text="AGI: "+str(self.agi)),Label(text="DEF: "+str(self.blk)),Label(text="Gold: "+str(self.gold))]
+        for i in self.ui:
+            i.pack(side="top")
+    def drawui(self):
+        ui=self.ui
+        ui[0]["text"]="HP:"+str(self.maxhp)+"/"+str(self.hp)
+        ui[1]["text"]="STR: "+str(self.str)
+        ui[2]["text"]="AGI: "+str(self.agi)
+        ui[3]["text"]="DEF: "+str(self.blk)
+        ui[4]["text"]="Gold: "+str(self.gold)
     def drawtiles(self):
         for i in self.gamemap:
             for j in i:
+                j.clear()
                 j.draw()
     def tileclick(self,x,y):
         if abs(self.playerx-x)>1 or abs(self.playery-y)>1:
@@ -134,7 +156,12 @@ class Tile:
         else:
             self.upper.tileclick(self.x,self.y)
     def interact(self):
-        pass
+        if self.tile=="gold":
+            self.upper.gold+=10
+            self.tile="blank"          
+            self.clear()
+            self.draw()
+            self.upper.drawui()
     def standable(self):
         return (self.tile in ["blank"]+self.treasure+self.ground) and (not self.capped)
     def search(self):

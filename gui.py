@@ -67,12 +67,12 @@ class App(Frame):
             x=randint(0,15)
             y=randint(0,15)
             if self.tile(x,y).tile=="blank":
-                self.gamemap[randint(0,15)][randint(0,15)].tile=choice(monsters)
+                self.gamemap[x][y].tile=choice(monsters)
         for i in range(10):
             x=randint(0,15)
             y=randint(0,15)
             if self.tile(x,y).tile=="blank":
-                self.gamemap[randint(0,15)][randint(0,15)].tile=choice(treasure)
+                self.gamemap[x][y].tile=choice(treasure)
         for i in self.gamemap:
             for j in i:
                 pass

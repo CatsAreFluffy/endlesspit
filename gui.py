@@ -23,11 +23,7 @@ class App(Frame):
         self.drawgrid(self.cellsize)
         self.drawtiles()
         self.createui()
-        #self.drawui()
-    def buttonaevent(self):
-        pass
-    def buttonbevent(self):
-        pass
+        self.drawui()
     def creategrid(self):
         self.gamemap=[[Tile(j,i,self.cellsize,self.draw,self) for i in range(0,16)] for j in range(0,16)]
         self.playerx=randint(1,15)
@@ -86,7 +82,6 @@ class App(Frame):
             movy=-1
         if self.playery<y:
             movy=1
-        print(movx,movy)
         if self.tile(self.playerx+movx,self.playery+movy).standable():
             self.playerx+=movx
             self.playery+=movy

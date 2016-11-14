@@ -14,6 +14,7 @@ class App(Frame):
         self.blk=0
         self.acc=0
         self.ui=[0,0,0,0,0]
+        self.monsterlist=[]
         self.createWidgets()
     def createWidgets(self):
         self.draw=Canvas(self,width=16*self.cellsize+6,height=16*self.cellsize+6)
@@ -67,7 +68,9 @@ class App(Frame):
             x=randint(0,15)
             y=randint(0,15)
             if self.tile(x,y).tile=="blank":
-                self.gamemap[x][y].tile=choice(monsters)
+                z=choice(monsters)
+                self.gamemap[x][y].tile=z
+                self.monsterlist.append(Monster(x,y,z,self))
         for i in range(10):
             x=randint(0,15)
             y=randint(0,15)
@@ -139,6 +142,9 @@ class App(Frame):
         self.tile(self.playerx,self.playery).clear()
         self.tile(self.playerx,self.playery).uncap()
         self.tile(self.playerx,self.playery).draw()
+    def turn(self):
+        for i in self.monsterlist:
+            i.move()
 class Tile:
     def __init__(self,x,y,cellsize,canvas,upper,tile="blank"):
         self.tile=tile
@@ -199,6 +205,7 @@ class Tile:
             self.draw()
         else:
             self.upper.tileclick(self.x,self.y)
+        self.upper.turn()
     def interact(self):
         if self.tile=="gold":
             self.upper.gold+=10
@@ -208,6 +215,8 @@ class Tile:
             self.upper.drawui()
     def standable(self):
         return (self.tile in ["blank"]+self.treasure+self.ground) and (not self.capped)
+    def standablem(self):
+        return (self.tile=="blank") and (not self.capped) 
     def search(self):
         monsters=0
         treasure=0
@@ -218,6 +227,51 @@ class Tile:
                 if self.upper.tile(self.x+i,self.y+j).tile in self.treasure:
                     treasure+=1
         return [monsters,treasure]
+class Monster:
+    def __init__(self,x,y,tile,upper):
+        self.x=x
+        self.y=y
+        self.tile=tile
+        self.upper=upper
+        if tile=="rat":
+            self.hp=5
+            self.dice=1
+            self.dfaces=3
+            self.agi=1
+            self.str=-1
+            self.blk=0
+    def turn(self):
+        if abs(self.upper.playerx-self.x)>1 or abs(self.upper.playery-self.y)>1:
+            self.move()
+        else:
+            pass
+    def move(self):
+        movx=0
+        movy=0
+        if not self.upper.tile(self.x,self.y).capped:
+            if self.x>self.upper.playerx:
+                movx=-1
+            if self.x<self.upper.playerx:
+                movx=1
+            if self.y>self.upper.playery:
+                movy=-1
+            if self.y<self.upper.playery:
+                movy=1
+            if self.upper.tile(self.x+movx,self.y+movy).standablem():
+                self.x+=movx
+                self.y+=movy
+            elif self.upper.tile(self.x,self.y+movy).standablem():
+                self.y+=movy
+                movx=0
+            elif self.upper.tile(self.x+movx,self.y).standablem():
+                self.x+=movx
+                movy=0
+            self.upper.tile(self.x-movx,self.y-movy).tile="blank"
+            self.upper.tile(self.x-movx,self.y-movy).clear()
+            self.upper.tile(self.x-movx,self.y-movy).draw()
+            self.upper.tile(self.x,self.y).tile=self.tile
+            self.upper.tile(self.x,self.y).clear()
+            self.upper.tile(self.x,self.y).draw()
 root=Tk()
 app=App(master=root)
 app.mainloop()

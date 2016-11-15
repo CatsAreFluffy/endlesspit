@@ -63,7 +63,7 @@ class App(Frame):
         self.playerx=randint(1,15)
         self.playery=randint(1,15)
         treasure=["gold"]
-        monsters=["rat"]
+        monsters=["rat","cultist"]
         for i in range(10):
             x=randint(0,15)
             y=randint(0,15)
@@ -103,7 +103,6 @@ class App(Frame):
     def drawtiles(self):
         for i in self.gamemap:
             for j in i:
-                j.clear()
                 j.draw()
     def tileclick(self,x,y):
         if abs(self.playerx-x)>1 or abs(self.playery-y)>1:
@@ -144,7 +143,7 @@ class App(Frame):
         self.tile(self.playerx,self.playery).draw()
     def turn(self):
         for i in self.monsterlist:
-            i.move()
+            i.turn()
 class Tile:
     def __init__(self,x,y,cellsize,canvas,upper,tile="blank"):
         self.tile=tile
@@ -186,6 +185,8 @@ class Tile:
                 self.objects.append(self.canvas.create_text(7+(self.x+0.5)*self.cellsize,7+(self.y+0.5)*self.cellsize,text="$",fill="#ff0",font=('Helvetica',str(int(self.cellsize*0.75)))))
             elif self.tile=="rat":
                 self.objects.append(self.canvas.create_text(7+(self.x+0.5)*self.cellsize,7+(self.y+0.5)*self.cellsize,text="r",fill="#c40",font=('Helvetica',str(int(self.cellsize*0.75)))))
+            elif self.tile=="cultist":
+                self.objects.append(self.canvas.create_text(7+(self.x+0.5)*self.cellsize,7+(self.y+0.5)*self.cellsize,text="C",fill="#c00",font=('Helvetica',str(int(self.cellsize*0.75)))))
             for i in self.objects:
                 self.canvas.tag_bind(i,"<Button-1>",self.action)
         if (self.x,self.y)==(self.upper.playerx,self.upper.playery):
@@ -221,7 +222,7 @@ class Tile:
     def standable(self):
         return (self.tile in ["blank"]+self.treasure+self.ground) and (not self.capped)
     def standablem(self):
-        return (self.tile=="blank") and (not self.capped) 
+        return (self.tile=="blank") and (not self.capped)
     def search(self):
         monsters=0
         treasure=0
@@ -244,6 +245,13 @@ class Monster:
             self.dfaces=3
             self.agi=1
             self.str=-1
+            self.blk=0
+        elif tile=="cultist":
+            self.hp=9
+            self.dice=1
+            self.dfaces=4
+            self.agi=0
+            self.str=0
             self.blk=0
     def turn(self):
         if abs(self.upper.playerx-self.x)>1 or abs(self.upper.playery-self.y)>1:

@@ -15,12 +15,15 @@ class App(Frame):
         self.acc=0
         self.ui=[0,0,0,0,0]
         self.monsterlist=[]
+        self.shiftkey=False
         self.createWidgets()
     def createWidgets(self):
         self.draw=Canvas(self,width=16*self.cellsize+6,height=16*self.cellsize+6)
+        self.bind("<Shift_L>",self.shift)
+        self.bind("<KeyRelease-Shift_L>",self.unshift)
         self.creategrid()
         self.draw.pack(side="left")
-        self.gamemap[self.playerx][self.playery].uncap()
+        self.gamemap[self.playerx][self.playery].uncapnear()
         self.drawgrid(self.cellsize)
         self.drawtiles()
         self.createui()
@@ -144,6 +147,12 @@ class App(Frame):
     def turn(self):
         for i in self.monsterlist:
             i.turn()
+    def shift(self):
+        self.shiftkey=True
+        print(True)
+    def unshift(self):
+        self.shiftkey=False
+        print(False)
 class Tile:
     def __init__(self,x,y,cellsize,canvas,upper,tile="blank"):
         self.tile=tile
@@ -154,7 +163,7 @@ class Tile:
         self.canvas=canvas
         self.upper=upper
         self.objects=[]
-        self.monsters=["rat"]
+        self.monsters=["rat","cultist"]
         self.treasure=["gold"]
         self.ground=[]
     def mapcheck(self,wmap):
@@ -165,6 +174,7 @@ class Tile:
         if self.capped:
             self.objects.append(self.canvas.create_rectangle(7+(self.x)*self.cellsize,7+(self.y)*self.cellsize,7+(self.x+1)*self.cellsize,7+(self.y+1)*self.cellsize,fill="#666"))
             self.canvas.tag_bind(self.objects[0],"<Button-1>",self.action)
+            self.canvas.tag_bind(self.objects[0],"<Shift-Button-1>",self.shiftaction)
         else:
             if self.tile=="wall":
                 self.objects.append(self.canvas.create_rectangle(7+(self.x)*self.cellsize,7+(self.y)*self.cellsize,7+(self.x+1)*self.cellsize,7+(self.y+1)*self.cellsize,fill="#111"))
@@ -189,6 +199,7 @@ class Tile:
                 self.objects.append(self.canvas.create_text(7+(self.x+0.5)*self.cellsize,7+(self.y+0.5)*self.cellsize,text="C",fill="#c00",font=('Helvetica',str(int(self.cellsize*0.75)))))
             for i in self.objects:
                 self.canvas.tag_bind(i,"<Button-1>",self.action)
+                self.canvas.tag_bind(i,"<Shift-Button-1>",self.shiftaction)
         if (self.x,self.y)==(self.upper.playerx,self.upper.playery):
             self.drawplayer()
     def drawplayer(self):
@@ -200,10 +211,13 @@ class Tile:
         self.objects=[]
     def uncap(self):
         self.capped=False
+    def shiftaction(self,event):
+        self.uncapnear()
+        self.updatenear()
+        self.upper.turn()
     def action(self,event):
         if self.capped:
             self.uncap()
-            self.clear()
             self.draw()
         else:
             self.upper.tileclick(self.x,self.y)
@@ -211,7 +225,12 @@ class Tile:
     def updatenear(self):
         for i in range(-1,2):
             for j in range(-1,2):
-                self.upper.tile(self.x+i,self.y+j).draw()        
+                self.upper.tile(self.x+i,self.y+j).draw()
+    def uncapnear(self):
+        for i in range(-1,2):
+            for j in range(-1,2):
+                if self.upper.tile(self.x+i,self.y+j).capped:
+                    self.upper.tile(self.x+i,self.y+j).uncap()
     def interact(self):
         if self.tile=="gold":
             self.upper.gold+=10

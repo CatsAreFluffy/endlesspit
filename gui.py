@@ -156,7 +156,7 @@ class App(Frame):
 class Tile:
     def __init__(self,x,y,cellsize,canvas,upper,tile="blank"):
         self.tile=tile
-        self.capped=True
+        self.capped=False
         self.x=x
         self.y=y
         self.cellsize=cellsize
@@ -169,6 +169,7 @@ class Tile:
     def mapcheck(self,wmap):
         if wmap[self.y][self.x]=="1":
             self.tile="wall"
+            self.wall=True
     def draw(self):
         self.clear()
         if self.capped:
@@ -281,6 +282,7 @@ class Monster:
         movx=0
         movy=0
         if not self.upper.tile(self.x,self.y).capped:
+            self.moveout()
             if self.x>self.upper.playerx:
                 movx=-1
             if self.x<self.upper.playerx:
@@ -298,14 +300,17 @@ class Monster:
             elif self.upper.tile(self.x+movx,self.y).standablem():
                 self.x+=movx
                 movy=0
-            self.upper.tile(self.x-movx,self.y-movy).tile="blank"
-            self.upper.tile(self.x-movx,self.y-movy).clear()
-            self.upper.tile(self.x-movx,self.y-movy).draw()
-            self.upper.tile(self.x-movx,self.y-movy).updatenear()
-            self.upper.tile(self.x,self.y).tile=self.tile
-            self.upper.tile(self.x,self.y).clear()
+            self.movein()
+    def moveout(self):
+        if self.upper.tile(self.x,self.y).tile==self.tile:
+            self.upper.tile(self.x,self.y).tile="blank"
             self.upper.tile(self.x,self.y).draw()
             self.upper.tile(self.x,self.y).updatenear()
+    def movein(self):
+        self.upper.tile(self.x,self.y).tile=self.tile
+        self.upper.tile(self.x,self.y).draw()
+        self.upper.tile(self.x,self.y).updatenear()
+        
 root=Tk()
 app=App(master=root)
 app.mainloop()

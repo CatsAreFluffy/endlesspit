@@ -162,6 +162,7 @@ class Tile:
         if wmap[self.y][self.x]=="1":
             self.tile="wall"
     def draw(self):
+        self.clear()
         if self.capped:
             self.objects.append(self.canvas.create_rectangle(7+(self.x)*self.cellsize,7+(self.y)*self.cellsize,7+(self.x+1)*self.cellsize,7+(self.y+1)*self.cellsize,fill="#666"))
             self.canvas.tag_bind(self.objects[0],"<Button-1>",self.action)
@@ -206,12 +207,16 @@ class Tile:
         else:
             self.upper.tileclick(self.x,self.y)
         self.upper.turn()
+    def updatenear(self):
+        for i in range(-1,2):
+            for j in range(-1,2):
+                self.upper.tile(self.x+i,self.y+j).draw()        
     def interact(self):
         if self.tile=="gold":
             self.upper.gold+=10
             self.tile="blank"          
-            self.clear()
             self.draw()
+            self.updatenear()
             self.upper.drawui()
     def standable(self):
         return (self.tile in ["blank"]+self.treasure+self.ground) and (not self.capped)
@@ -269,9 +274,11 @@ class Monster:
             self.upper.tile(self.x-movx,self.y-movy).tile="blank"
             self.upper.tile(self.x-movx,self.y-movy).clear()
             self.upper.tile(self.x-movx,self.y-movy).draw()
+            self.upper.tile(self.x-movx,self.y-movy).updatenear()
             self.upper.tile(self.x,self.y).tile=self.tile
             self.upper.tile(self.x,self.y).clear()
             self.upper.tile(self.x,self.y).draw()
+            self.upper.tile(self.x,self.y).updatenear()
 root=Tk()
 app=App(master=root)
 app.mainloop()

@@ -156,7 +156,7 @@ class App(Frame):
 class Tile:
     def __init__(self,x,y,cellsize,canvas,upper,tile="blank"):
         self.tile=tile
-        self.capped=False
+        self.capped=True
         self.x=x
         self.y=y
         self.cellsize=cellsize
@@ -164,6 +164,7 @@ class Tile:
         self.upper=upper
         self.objects=[]
         self.monsters=["rat","cultist"]
+        self.monster=None
         self.treasure=["gold"]
         self.ground=[]
     def mapcheck(self,wmap):
@@ -259,6 +260,7 @@ class Monster:
         self.y=y
         self.tile=tile
         self.upper=upper
+        self.upper.tile(self.x,self.y).monster=self
         if tile=="rat":
             self.hp=5
             self.dice=1
@@ -304,10 +306,12 @@ class Monster:
     def moveout(self):
         if self.upper.tile(self.x,self.y).tile==self.tile:
             self.upper.tile(self.x,self.y).tile="blank"
+            self.upper.tile(self.x,self.y).monster=None
             self.upper.tile(self.x,self.y).draw()
             self.upper.tile(self.x,self.y).updatenear()
     def movein(self):
         self.upper.tile(self.x,self.y).tile=self.tile
+        self.upper.tile(self.x,self.y).monster=self
         self.upper.tile(self.x,self.y).draw()
         self.upper.tile(self.x,self.y).updatenear()
         
